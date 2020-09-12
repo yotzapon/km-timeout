@@ -208,6 +208,29 @@ func timeoutWithHttpTransport() *responseModel {
 	}
 }
 
+func timeoutWithCancel() *responseModel {
+	log.Print("begin request by timeoutWithContext method")
+	ctx, cancel := context.WithCancel(context.Background())
+	_ = time.AfterFunc(time.Millisecond * FAIL_DELAY, func() {
+		cancel()
+	})
+
+	httpClient := &http.Client{}
+
+	req, err := http.NewRequest(http.MethodGet, FAIL_DELAY_URL, nil)
+	if err != nil {
+		return nil
+	}
+
+	start := time.Now()
+	resp, err := httpClient.Do(req.WithContext(ctx))
+	end := time.Since(start)
+	return &responseModel{
+		Error: err,
+		HttpResponse: resp,
+		TimeElapse: end,
+	}
+}
 
 // output
 //2020/09/12 00:01:38 begin request by timeoutWithHttpClientSuccess method
